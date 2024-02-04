@@ -32,10 +32,12 @@ def get_color_name(hsv_triplet):
 
 
 while True:
-
+    # image source
     response = requests.get('http://192.168.21.188:8081/0/current')
     response.raise_for_status()
     img_new = Image.open(io.BytesIO(response.content))
+
+    # image resize and conversion to list
     img_new = img_new.resize((32, 32), resample=Image.Resampling.BILINEAR)
     img_new_pixel_list = list(img_new.getdata())
 
@@ -43,26 +45,17 @@ while True:
 
         diff = ImageChops.difference(img_new, img_old)
         diff_pixel_list = list(diff.getdata())
-        # print(diff_pixel_list)
-        # diff.show()
         diff_pixel_list_hsv = list(map(rgb_to_hsv, diff_pixel_list))
-        # print(diff_pixel_list_hsv)
+
         v_list = list(map(hsv_to_v, diff_pixel_list_hsv))
         new_max_pixel_v = max(v_list)
-        # print(new_max_pixel_v)
 
-        # print(new_max_pixel_v)
-
-        if new_max_pixel_v >= 10:
+        if new_max_pixel_v >= 5:
 
             position = v_list.index(new_max_pixel_v)
             pixel_new = rgb_to_hsv(img_new_pixel_list[position])
 
             if pixel_new[1] > 50:
-                # print(diff_pixel_list_hsv[position])
-                print(pixel_new)
+                print(pixel_new, ' -> ', get_color_name(pixel_new))
 
-                print(get_color_name(pixel_new))
-                # if get_color_name(rgb_to_hsv(pixel_new)) == "yellow":
-                    # diff.show()
     img_old = img_new
